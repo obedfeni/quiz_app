@@ -125,6 +125,7 @@ if st.session_state.quiz_started:
         player_number = update_player_count()
         if player_number:
             st.markdown(f"👥 You are **Player #{player_number}** to finish the quiz!")
-        st.markdown("📸 Screenshot your result and post under Obed’s Bluesky post!")
+        st.markdown("📸 Screenshot your result and post under mufasa’s Bluesky post!")
         st.session_state.quiz_started = False
+
 
