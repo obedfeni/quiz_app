@@ -20,6 +20,57 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+# Custom Theme: Blue & White
+custom_style = """
+    <style>
+    body {
+        background-color: #f0f6ff; /* Light blue-white background */
+        color: #0d1b2a; /* Dark navy text */
+    }
+
+    .stApp {
+        background-color: #f0f6ff;
+    }
+
+    h1, h2, h3, h4 {
+        color: #1e3a8a; /* Deep blue headings */
+    }
+
+    .stButton>button {
+        background-color: #2563eb; /* Bright blue buttons */
+        color: white;
+        border-radius: 12px;
+        padding: 0.6em 1.2em;
+        font-weight: bold;
+        border: none;
+    }
+
+    .stButton>button:hover {
+        background-color: #1e40af; /* Darker blue on hover */
+        color: white;
+    }
+
+    .stTextInput>div>div>input {
+        border-radius: 10px;
+        border: 1px solid #2563eb;
+        padding: 0.5em;
+    }
+
+    .stAlert {
+        border-radius: 10px;
+        padding: 1em;
+    }
+
+    .css-1d391kg {  /* Leaderboard spacing fix */
+        background-color: white;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+    }
+    </style>
+"""
+st.markdown(custom_style, unsafe_allow_html=True)
+
 
 DATA_FILE = "player_data.json"
 
@@ -184,3 +235,4 @@ if username:
 
     st.markdown("---")
     st.info(f"👀 Total site visits: {data.get('visits', 0)}") 
+
