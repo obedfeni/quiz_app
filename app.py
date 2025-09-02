@@ -165,12 +165,6 @@ if "counted_visit" not in st.session_state:
 # -------------------
 username = st.text_input("👉 Enter your username to start:")
 
-# Prevent duplicate usernames
-if username in players:
-    st.warning("⚠️ Username already taken. Please choose another one.")
-    username = None
-
-
 if not username:
     st.stop()
 
@@ -287,5 +281,6 @@ if username in players:
         share_text = f"🧠 I scored {players[username]['score']} pts with a 🔥 streak of {players[username]['streak']} days in Obed’s Puzzle Challenge! Try to beat me!"
         st.text_area("📢 Share your results:", share_text, height=100)
         st.markdown("👉 Copy this text and post on **Bluesky, Snapchat, Twitter, or WhatsApp**!")
+
 
 
