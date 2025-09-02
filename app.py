@@ -7,7 +7,11 @@ from datetime import datetime, timedelta
 # -------------------
 # CONFIG
 # -------------------
-st.set_page_config(page_title="Answer mufasa's Questions 🎮", page_icon="🎯", layout="centered")
+st.set_page_config(
+    page_title="Answer Obed's Questions 🎮",
+    page_icon="🎯",
+    layout="centered"
+)
 
 DATA_FILE = "player_data.json"
 
@@ -33,8 +37,8 @@ questions = {
     "About Obed": [
         {"q": "What is Obed Feni’s African house name?", "options": ["Kobby", "Kojo", "Nana", "Kwame"], "answer": "Kobby"},
         {"q": "How old is Obed Feni?", "options": ["22", "24", "26", "28"], "answer": "24"},
-        {"q": "What is Obed’s favorite food?", "options": ["Jollof Rice", "Pizza", "Fufu", "Banku"], "answer": "YOUR_ANSWER"},
-        {"q": "What is Obed’s favorite movie?", "options": ["Inception", "Black Panther", "Titanic", "Avengers"], "answer": "YOUR_ANSWER"},
+        {"q": "What is Obed’s favorite food?", "options": ["Jollof Rice", "Pizza", "Fufu", "Banku"], "answer": "Jollof Rice"},  # <-- update to your real answer
+        {"q": "What is Obed’s favorite movie?", "options": ["Inception", "Black Panther", "Titanic", "Avengers"], "answer": "Black Panther"},  # <-- update
     ],
     "Science & STEM": [
         {"q": "What is H2O commonly known as?", "options": ["Water", "Oxygen", "Hydrogen", "Salt"], "answer": "Water"},
@@ -55,10 +59,12 @@ questions = {
 }
 
 # -------------------
-# USER LOGIN
+# MAIN APP
 # -------------------
-st.title("🎯 Answer mufasa's Questions!")
-username = st.text_input("Enter your name to start:")
+st.title("🎯 Answer Obed's Questions!")
+st.markdown("Welcome! Play daily, earn points, and climb the leaderboard 🚀")
+
+username = st.text_input("👉 Enter your name to start:")
 
 if username:
     today = datetime.now().strftime("%Y-%m-%d")
@@ -72,28 +78,35 @@ if username:
     # GAME LOGIC
     # -------------------
     if player["today_count"] < 3:
-        st.subheader("Choose a category:")
+        st.subheader("📂 Choose a category:")
         category = st.selectbox("Categories", list(questions.keys()))
 
-        if st.button("Get a Question 🎲"):
-            q = random.choice(questions[category])
-            st.write(f"**{q['q']}**")
-            choice = st.radio("Pick one:", q["options"], key=random.randint(0, 100000))
+        if "current_q" not in st.session_state:
+            st.session_state.current_q = None
 
-            if st.button("Submit Answer ✅"):
+        if st.button("🎲 Get a Question"):
+            st.session_state.current_q = random.choice(questions[category])
+
+        if st.session_state.current_q:
+            q = st.session_state.current_q
+            st.markdown(f"### ❓ {q['q']}")
+            choice = st.radio("Pick one:", q["options"], key=f"choice_{player['today_count']}")
+
+            if st.button("✅ Submit Answer"):
                 if q["answer"] and choice == q["answer"]:
-                    st.success("Correct! 🎉")
-                    player["score"] += 1
+                    st.success("🎉 Correct! +10 points")
+                    player["score"] += 10
                 elif q["answer"]:
-                    st.error(f"Wrong! The correct answer is {q['answer']}.")
+                    st.error(f"❌ Wrong! The correct answer is **{q['answer']}**.")
                 else:
-                    st.info(f"Nice choice: {choice}")
+                    st.info(f"✨ Interesting choice: **{choice}**")
 
                 player["today_count"] += 1
                 player["last_played"] = today
 
-                # Update streak
-                if player.get("last_played") == (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"):
+                # Streak logic
+                yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+                if player.get("last_played") == yesterday:
                     player["streak"] += 1
                 elif player["today_count"] == 1:
                     player["streak"] = 1
@@ -101,13 +114,20 @@ if username:
                 players[username] = player
                 save_data(players)
 
+                # Clear question
+                st.session_state.current_q = None
+
     else:
-        st.warning("You’ve answered 3 questions today. Come back tomorrow! ⏰")
+        st.warning("⏳ You’ve answered 3 questions today. Come back tomorrow!")
 
     # -------------------
     # LEADERBOARD
     # -------------------
+    st.markdown("---")
     st.subheader("🏆 Leaderboard")
     leaderboard = sorted(players.items(), key=lambda x: x[1]["score"], reverse=True)
+
     for i, (name, data) in enumerate(leaderboard[:10], start=1):
-        st.write(f"{i}. {name} — {data['score']} points (🔥 Streak: {data['streak']} days)")
+        st.markdown(
+            f"**{i}. {name}** — {data['score']} pts | 🔥 Streak: {data['streak']} days"
+        )
