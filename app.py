@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 st.markdown(
-    "<h1 style='text-align:center; color:#4CAF50;'>🔥 Obed's Quiz Challenge 🔥</h1>",
+    "<h1 style='text-align:center; color:#4CAF50;'>🔥 mufasa's Quiz Challenge 🔥</h1>",
     unsafe_allow_html=True
 )
 st.write("Choose a category, answer 3 questions, and share your score under mufasa Bluesky post 🎉")
@@ -127,3 +127,4 @@ if st.session_state.quiz_started:
             st.markdown(f"👥 You are **Player #{player_number}** to finish the quiz!")
         st.markdown("📸 Screenshot your result and post under Obed’s Bluesky post!")
         st.session_state.quiz_started = False
+
