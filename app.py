@@ -12,79 +12,61 @@ st.set_page_config(
     page_icon="🧠",
     layout="centered"
 )
-hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    </style>
+
+# Hide Streamlit chrome (menu, footer, header)
+_hide_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
 """
-# Custom Theme: Blue & White
-custom_style = """
-    <style>
-    body {
-        background-color: #f0f6ff; /* Light blue-white background */
-        color: #0d1b2a; /* Dark navy text */
-    }
+st.markdown(_hide_style, unsafe_allow_html=True)
 
-    .stApp {
-        background-color: #f0f6ff;
-    }
-
-    h1, h2, h3, h4 {
-        color: #1e3a8a; /* Deep blue headings */
-    }
-
-    .stButton>button {
-        background-color: #2563eb; /* Bright blue buttons */
-        color: white;
-        border-radius: 12px;
-        padding: 0.6em 1.2em;
-        font-weight: bold;
-        border: none;
-    }
-
-    .stButton>button:hover {
-        background-color: #1e40af; /* Darker blue on hover */
-        color: white;
-    }
-
-    .stTextInput>div>div>input {
-        border-radius: 10px;
-        border: 1px solid #2563eb;
-        padding: 0.5em;
-    }
-
-    .stAlert {
-        border-radius: 10px;
-        padding: 1em;
-    }
-
-    .css-1d391kg {  /* Leaderboard spacing fix */
-        background-color: white;
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-    }
-    </style>
+# Blue & White custom theme
+_custom_style = """
+<style>
+html, body, .stApp { background: #f0f6ff; color: #0d1b2a; }
+h1, h2, h3, h4, h5 { color: #1e3a8a; }
+.stButton>button {
+  background: #2563eb; color: #fff; border: none; border-radius: 12px;
+  padding: .6em 1.1em; font-weight: 600;
+}
+.stButton>button:hover { background: #1e40af; }
+.stTextInput>div>div>input {
+  border: 1px solid #2563eb; border-radius: 10px; padding: .55em .7em;
+}
+.block-card {
+  background: #ffffff; border-radius: 14px; padding: 16px 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06); margin: 10px 0;
+}
+.small { color:#334155; font-size:.92rem; }
+</style>
 """
-st.markdown(custom_style, unsafe_allow_html=True)
-
+st.markdown(_custom_style, unsafe_allow_html=True)
 
 DATA_FILE = "player_data.json"
+PLAYS_PER_DAY = 5
+POINTS_PER_CORRECT = 10
 
 # -------------------
 # LOAD / SAVE DATA
 # -------------------
 def load_data():
     if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r") as f:
-            return json.load(f)
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
     return {"players": {}, "visits": 0}
 
 def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception:
+        pass
 
 data = load_data()
 players = data.get("players", {})
@@ -127,7 +109,7 @@ puzzles = [
     {"q": "What is H2O?", "answer": "water"},
     {"q": "Which metal is liquid at room temperature?", "answer": "mercury"},
     {"q": "What does DNA stand for? (short form)", "answer": "dna"},
-    
+
     # History
     {"q": "Who was the first President of the USA?", "answer": "george washington"},
     {"q": "In which year did World War II end?", "answer": "1945"},
@@ -160,79 +142,135 @@ puzzles = [
 ]
 
 # -------------------
-# MAIN APP
+# HEADER
 # -------------------
-st.title("🧠 Obed’s Daily Puzzle Challenge")
-st.markdown("Solve up to **5 puzzles a day**, earn points, and climb the leaderboard 🚀")
+st.markdown(
+    """
+    <div class="block-card" style="text-align:center;">
+      <h1>🧠 Obed’s Daily Puzzle Challenge</h1>
+      <p class="small">Solve up to <b>5 puzzles per day</b>. Each correct answer is <b>+10 points</b>. Keep your streak and climb the leaderboard 🚀</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-# Track visits
-if "visited" not in st.session_state:
+# Count one visit per browser session
+if "counted_visit" not in st.session_state:
     data["visits"] = data.get("visits", 0) + 1
     save_data(data)
-    st.session_state.visited = True
+    st.session_state.counted_visit = True
 
-username = st.text_input("👉 Enter your username to start:")
+# -------------------
+# USERNAME
+# -------------------
+username = st.text_input("👤 Enter your username to start:", placeholder="e.g., Kobby24")
 
-if username:
-    today = datetime.now().strftime("%Y-%m-%d")
-    player = players.get(username, {"score": 0, "last_played": None, "streak": 0, "today_count": 0})
+if not username:
+    st.stop()
 
-    # Reset daily counter
-    if player["last_played"] != today:
-        player["today_count"] = 0
+# Ensure player record exists
+if username not in players:
+    players[username] = {"score": 0, "last_played": None, "streak": 0, "today_count": 0}
+    data["players"] = players
+    save_data(data)
 
-    # -------------------
-    # GAME LOGIC
-    # -------------------
-    if player["today_count"] < 5:
-        if "current_q" not in st.session_state:
-            st.session_state.current_q = None
+player = players[username]
+today = datetime.now().strftime("%Y-%m-%d")
 
+# Reset today's counter if new day
+if player.get("last_played") != today:
+    player["today_count"] = 0
+
+# -------------------
+# SESSION STATE (always store full puzzle dict)
+# -------------------
+if "current_q" not in st.session_state:
+    st.session_state.current_q = None  # will hold {'q':..., 'answer':...}
+if "q_session_id" not in st.session_state:
+    st.session_state.q_session_id = 0  # used to reset input widgets
+
+# -------------------
+# GAME LOGIC
+# -------------------
+remaining = max(0, PLAYS_PER_DAY - player["today_count"])
+st.markdown(f"<div class='block-card'><b>🗓️ Daily plays left:</b> {remaining} / {PLAYS_PER_DAY}</div>", unsafe_allow_html=True)
+
+if remaining == 0:
+    st.warning("⏳ You’ve answered your 5 puzzles today. Come back tomorrow!")
+else:
+    c1, c2 = st.columns([1, 2])
+    with c1:
         if st.button("🎲 Get a Puzzle"):
-            st.session_state.current_q = random.choice(puzzles)
+            st.session_state.current_q = random.choice(puzzles)   # store the full dict
+            st.session_state.q_session_id += 1                    # refresh input widget
 
-        if st.session_state.current_q:
-            q = st.session_state.current_q
-            st.markdown(f"### ❓ {q['q']}")
-            answer = st.text_input("Your answer:", key=f"ans_{player['today_count']}")
+    # Show puzzle if present
+    if st.session_state.current_q:
+        qobj = st.session_state.current_q
+        # Defensive: handle both dict or stray string (from older state)
+        if isinstance(qobj, dict):
+            q_text = qobj.get("q", "")
+            correct_answer = qobj.get("answer", "")
+        else:
+            q_text = str(qobj)
+            correct_answer = str(st.session_state.get("current_a", ""))
 
-            if st.button("✅ Submit Answer", key=f"submit_{player['today_count']}"):
-                if answer.strip().lower() == q["answer"].lower():
-                    st.success("🎉 Correct! +10 points")
-                    player["score"] += 10
-                else:
-                    st.error(f"❌ Wrong! The correct answer is **{q['answer']}**.")
+        st.markdown(f"<div class='block-card'><h3>❓ {q_text}</h3></div>", unsafe_allow_html=True)
 
-                player["today_count"] += 1
-                yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-                if player.get("last_played") == yesterday:
-                    player["streak"] += 1
-                elif player["today_count"] == 1:
-                    player["streak"] = 1
-                player["last_played"] = today
-
-                players[username] = player
-                data["players"] = players
-                save_data(data)
-
-                st.session_state.current_q = None
-
-    else:
-        st.warning("⏳ You’ve answered 5 puzzles today. Come back tomorrow!")
-
-    # -------------------
-    # LEADERBOARD
-    # -------------------
-    st.markdown("---")
-    st.subheader("🏆 Leaderboard")
-    leaderboard = sorted(players.items(), key=lambda x: x[1]["score"], reverse=True)
-
-    for i, (name, pdata) in enumerate(leaderboard[:10], start=1):
-        st.markdown(
-            f"**{i}. {name}** — {pdata['score']} pts | 🔥 Streak: {pdata['streak']} days"
+        user_answer = st.text_input(
+            "Your answer:",
+            key=f"ans_{st.session_state.q_session_id}",
+            placeholder="Type your answer here"
         )
 
-    st.markdown("---")
-    st.info(f"👀 Total site visits: {data.get('visits', 0)}") 
+        if st.button("✅ Submit Answer", key=f"submit_{st.session_state.q_session_id}"):
+            # Evaluate (case-insensitive, trim spaces)
+            if user_answer.strip().lower() == str(correct_answer).strip().lower():
+                st.success(f"🎉 Correct! +{POINTS_PER_CORRECT} points")
+                player["score"] += POINTS_PER_CORRECT
+            else:
+                st.error(f"❌ Wrong! The correct answer is **{correct_answer}**.")
 
+            # Update counters & streaks
+            previously_played = player.get("last_played")
+            player["today_count"] += 1
+            player["last_played"] = today
 
+            if previously_played == (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"):
+                player["streak"] = player.get("streak", 0) + 1
+            elif player["today_count"] == 1:
+                player["streak"] = 1
+
+            # Persist
+            players[username] = player
+            data["players"] = players
+            save_data(data)
+
+            # Clear current puzzle
+            st.session_state.current_q = None
+
+            # If limit reached, notify
+            if player["today_count"] >= PLAYS_PER_DAY:
+                st.warning("⏳ That was your last puzzle for today. Come back tomorrow!")
+
+# -------------------
+# LEADERBOARD
+# -------------------
+st.markdown("----")
+st.subheader("🏆 Leaderboard")
+if players:
+    leaderboard = sorted(players.items(), key=lambda x: x[1].get("score", 0), reverse=True)
+    for i, (name, pdata) in enumerate(leaderboard[:10], start=1):
+        st.markdown(
+            f"<div class='block-card'><b>{i}. {name}</b> — {pdata.get('score',0)} pts "
+            f"&nbsp;|&nbsp; 🔥 Streak: {pdata.get('streak',0)} days</div>",
+            unsafe_allow_html=True
+        )
+else:
+    st.caption("No players yet. Be the first to play!")
+
+# -------------------
+# FOOTER STATS
+# -------------------
+st.markdown("----")
+st.info(f"👀 Total site visits: {data.get('visits', 0)}")
