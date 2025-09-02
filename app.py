@@ -22,13 +22,70 @@ def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
             return json.load(f)
-    return {}
+    return {"players": {}, "visitors": 0}
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-players = load_data()
+data = load_data()
+players = data.get("players", {})
+visitors = data.get("visitors", 0)
+
+# -------------------
+# PUZZLE BANK (50 words)
+# -------------------
+puzzles = [
+    {"word": "PYTHON", "hint": "A popular programming language"},
+    {"word": "CAMERA", "hint": "Used for photography"},
+    {"word": "STREAMLIT", "hint": "Framework we are using"},
+    {"word": "AFRICA", "hint": "Obed’s home continent"},
+    {"word": "PLANET", "hint": "Orbits around a star"},
+    {"word": "RIVER", "hint": "Flows into oceans or lakes"},
+    {"word": "MUSIC", "hint": "Universal language of sound"},
+    {"word": "OCEAN", "hint": "Covers most of Earth"},
+    {"word": "CLOUD", "hint": "Floats in the sky"},
+    {"word": "TREE", "hint": "Has leaves and gives shade"},
+    {"word": "BOOK", "hint": "Made of pages and words"},
+    {"word": "LIGHT", "hint": "Opposite of darkness"},
+    {"word": "FIRE", "hint": "Provides heat, can burn"},
+    {"word": "WATER", "hint": "Essential for life"},
+    {"word": "BRAIN", "hint": "Controls the body"},
+    {"word": "HEART", "hint": "Pumps blood"},
+    {"word": "PHONE", "hint": "Used to call people"},
+    {"word": "TRAIN", "hint": "Runs on tracks"},
+    {"word": "CAR", "hint": "Has four wheels"},
+    {"word": "HOUSE", "hint": "Where people live"},
+    {"word": "SUN", "hint": "Star at the center of solar system"},
+    {"word": "MOON", "hint": "Earth’s natural satellite"},
+    {"word": "STAR", "hint": "Shines in the night sky"},
+    {"word": "ROAD", "hint": "Where cars drive"},
+    {"word": "SHIP", "hint": "Travels on water"},
+    {"word": "CLOCK", "hint": "Tells time"},
+    {"word": "MAP", "hint": "Shows directions"},
+    {"word": "KEY", "hint": "Opens locks"},
+    {"word": "CHAIR", "hint": "You sit on it"},
+    {"word": "TABLE", "hint": "You eat on it"},
+    {"word": "PEN", "hint": "Used for writing"},
+    {"word": "PAPER", "hint": "You write on it"},
+    {"word": "LION", "hint": "King of the jungle"},
+    {"word": "DOG", "hint": "Man’s best friend"},
+    {"word": "CAT", "hint": "Likes to chase mice"},
+    {"word": "HORSE", "hint": "Fast running animal"},
+    {"word": "BIRD", "hint": "Has wings"},
+    {"word": "FISH", "hint": "Lives in water"},
+    {"word": "EGG", "hint": "Laid by chickens"},
+    {"word": "MILK", "hint": "Comes from cows"},
+    {"word": "CHEESE", "hint": "Made from milk"},
+    {"word": "BREAD", "hint": "Staple food"},
+    {"word": "APPLE", "hint": "Keeps the doctor away"},
+    {"word": "ORANGE", "hint": "Citrus fruit"},
+    {"word": "BANANA", "hint": "Long yellow fruit"},
+    {"word": "MANGO", "hint": "Sweet tropical fruit"},
+    {"word": "GRAPE", "hint": "Can be made into wine"},
+    {"word": "PEAR", "hint": "Shaped like a bell"},
+    {"word": "PEACH", "hint": "Fuzzy fruit"},
+]
 
 # -------------------
 # QUESTION BANK
@@ -51,10 +108,9 @@ questions = {
         {"q": "The Great Pyramid of Giza is in which country?", "options": ["Egypt", "Sudan", "Mexico", "India"], "answer": "Egypt"},
         {"q": "Which empire built the Colosseum?", "options": ["Greek", "Roman", "Ottoman", "Byzantine"], "answer": "Roman"},
     ],
-    "Psychometric & Fun": [
-        {"q": "Do you prefer mornings or nights?", "options": ["Mornings", "Nights"], "answer": None},
-        {"q": "If you were an animal, which one are you most like?", "options": ["Lion", "Turtle", "Bird", "Monkey"], "answer": None},
-        {"q": "You’re given $1,000 — do you spend or save?", "options": ["Spend", "Save"], "answer": None},
+    "Puzzle Words": [
+        {"q": p["hint"], "options": random.sample([w["word"] for w in puzzles if w != p], 3) + [p["word"]], "answer": p["word"]}
+        for p in puzzles
     ],
 }
 
@@ -62,24 +118,19 @@ questions = {
 # MAIN APP
 # -------------------
 st.title("🎯 Answer Obed's Questions!")
-st.markdown(
-    "<div style='background:#4CAF50;padding:12px;border-radius:10px;color:white;font-size:18px;'>"
-    "Welcome! Play daily, earn points, and climb the leaderboard 🚀"
-    "</div>",
-    unsafe_allow_html=True,
-)
+st.markdown("Welcome! Play daily, earn points, and climb the leaderboard 🚀")
 
 username = st.text_input("👉 Enter your name to start:")
 
 if username:
     today = datetime.now().strftime("%Y-%m-%d")
-    player = players.get(username, {
-        "score": 0,
-        "last_played": None,
-        "streak": 0,
-        "today_count": 0,
-        "categories": {}
-    })
+
+    # New visitor? Count them
+    if username not in players:
+        visitors += 1
+        data["visitors"] = visitors
+
+    player = players.get(username, {"score": 0, "last_played": None, "streak": 0, "today_count": 0})
 
     # Reset daily counter
     if player["last_played"] != today:
@@ -100,20 +151,20 @@ if username:
 
         if st.session_state.current_q:
             q = st.session_state.current_q
-            st.markdown(f"<h3>❓ {q['q']}</h3>", unsafe_allow_html=True)
-            choice = st.radio("Pick one:", q["options"], key=f"choice_{player['today_count']}")
+            st.markdown(f"### ❓ {q['q']}")
+            options = q["options"].copy()
+            random.shuffle(options)
+            choice = st.radio("Pick one:", options, key=f"choice_{player['today_count']}")
 
             if st.button("✅ Submit Answer"):
                 if q["answer"] and choice == q["answer"]:
                     st.success("🎉 Correct! +10 points")
                     player["score"] += 10
-                    player["categories"][category] = player["categories"].get(category, 0) + 10
-                elif q["answer"]:
-                    st.error(f"❌ Wrong! The correct answer is **{q['answer']}**.")
                 else:
-                    st.info(f"✨ Interesting choice: **{choice}**")
+                    st.error(f"❌ Wrong! The correct answer is **{q['answer']}**.")
 
                 player["today_count"] += 1
+                player["last_played"] = today
 
                 # Streak logic
                 yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -122,50 +173,41 @@ if username:
                 elif player["today_count"] == 1:
                     player["streak"] = 1
 
-                player["last_played"] = today
                 players[username] = player
-                save_data(players)
+                data["players"] = players
+                save_data(data)
 
                 # Clear question
                 st.session_state.current_q = None
 
-                # Shareable Results
-                share_text = f"I just played *Answer Obed's Questions!* 🎯\nScored {player['score']} pts total!\n🔥 Streak: {player['streak']} days"
-                st.text_area("📢 Share this on Bluesky:", share_text, height=100)
-                st.info("👉 Copy above text & paste under Obed's post!")
-
     else:
         st.warning("⏳ You’ve answered 3 questions today. Come back tomorrow!")
+
+        # Shareable results
+        share_text = f"""
+📢 I just played *Answer Obed's Questions!* 🎯
+🏆 Score: {player['score']} pts
+🔥 Streak: {player['streak']} days
+📅 Date: {today}
+
+Play here 👉 https://answermufasaquestions.streamlit.app/
+        """
+        st.text_area("📤 Copy & share your results:", share_text, height=120)
 
     # -------------------
     # LEADERBOARD
     # -------------------
     st.markdown("---")
-    st.subheader("🏆 Global Leaderboard")
+    st.subheader("🏆 Leaderboard")
     leaderboard = sorted(players.items(), key=lambda x: x[1]["score"], reverse=True)
 
-    for i, (name, data) in enumerate(leaderboard[:10], start=1):
+    for i, (name, pdata) in enumerate(leaderboard[:10], start=1):
         st.markdown(
-            f"<div style='padding:6px;border-radius:8px;background:#f0f0f0;margin:3px 0;'>"
-            f"<b>{i}. {name}</b> — {data['score']} pts | 🔥 {data['streak']} days"
-            f"</div>", unsafe_allow_html=True
+            f"**{i}. {name}** — {pdata['score']} pts | 🔥 Streak: {pdata['streak']} days"
         )
 
     # -------------------
-    # CATEGORY LEADERBOARD
+    # FOOTER
     # -------------------
     st.markdown("---")
-    st.subheader("📂 Category Leaderboard")
-    category_choice = st.selectbox("Pick a category to view:", list(questions.keys()))
-
-    category_scores = []
-    for name, data in players.items():
-        if "categories" in data and category_choice in data["categories"]:
-            category_scores.append((name, data["categories"][category_choice]))
-
-    if category_scores:
-        sorted_cat = sorted(category_scores, key=lambda x: x[1], reverse=True)
-        for i, (name, score) in enumerate(sorted_cat[:5], start=1):
-            st.markdown(f"**{i}. {name}** — {score} pts")
-    else:
-        st.info("No one has played this category yet. Be the first!")
+    st.info(f"👀 Total visitors so far: **{visitors}**")
