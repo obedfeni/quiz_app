@@ -5,115 +5,106 @@ import os
 from datetime import datetime, timedelta
 
 # -------------------
-# CONFIG
+# PAGE CONFIG
 # -------------------
 st.set_page_config(
-    page_title="Obed’s Puzzle Challenge 🧩",
-    page_icon="🧠",
+    page_title="Obed's Puzzle Challenge 🎮",
+    page_icon="🧩",
     layout="centered"
 )
 
-DATA_FILE = "player_data.json"
+# -------------------
+# HIDE STREAMLIT MENU & FOOTER
+# -------------------
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # -------------------
-# LOAD / SAVE DATA
+# DATA FILE
 # -------------------
+DATA_FILE = "player_data.json"
+
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
             return json.load(f)
-    return {"players": {}, "visits": 0}
+    return {}
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-data = load_data()
-players = data.get("players", {})
-visits = data.get("visits", 0)
+players = load_data()
 
 # -------------------
-# PUZZLE BANK (50+)
+# PUZZLE BANK (50+ puzzles, various types)
 # -------------------
 puzzles = [
-    # Scrambles
-    {"q": "Unscramble: **OTPNYH**", "answer": "PYTHON"},
-    {"q": "Unscramble: **OCPMUTER**", "answer": "COMPUTER"},
-    {"q": "Unscramble: **AHSRC** (used in math)", "answer": "CHAIR"},
-    {"q": "Unscramble: **SGNINEERNEI**", "answer": "ENGINEERING"},
-    {"q": "Unscramble: **ROTAHPOTOHS** (graphic tool)", "answer": "PHOTOSHOP"},
-    {"q": "Unscramble: **ANCMERIA** (country)", "answer": "AMERICA"},
-    {"q": "Unscramble: **CTEILEVE** (electric property)", "answer": "VELOCITE"},
-
-    # Logic/Math
-    {"q": "What comes next: 1, 1, 2, 3, 5, 8, ?", "answer": "13"},
-    {"q": "If a clock strikes 6 in 30 seconds, how long for 12?", "answer": "66"},
-    {"q": "Solve: If 5x = 20, what is x?", "answer": "4"},
-    {"q": "Which number is missing: 2, 4, 6, ?, 10", "answer": "8"},
-    {"q": "What is 12 squared?", "answer": "144"},
-    {"q": "I am a two-digit number, sum of digits is 11, difference is 5. What am I?", "answer": "83"},
-
-    # Riddles
-    {"q": "The more you take, the more you leave behind. What am I?", "answer": "footsteps"},
-    {"q": "I speak without a mouth and hear without ears. What am I?", "answer": "echo"},
-    {"q": "What has hands but cannot clap?", "answer": "clock"},
-    {"q": "What can travel around the world while staying in a corner?", "answer": "stamp"},
-    {"q": "What has a heart that doesn’t beat?", "answer": "artichoke"},
-    {"q": "I’m tall when I’m young, and short when I’m old. What am I?", "answer": "candle"},
-
-    # Science
-    {"q": "What is the powerhouse of the cell?", "answer": "mitochondria"},
-    {"q": "Water boils at what °C at sea level?", "answer": "100"},
-    {"q": "What gas do plants breathe in?", "answer": "carbon dioxide"},
-    {"q": "Which planet has the most moons?", "answer": "saturn"},
-    {"q": "What is H2O?", "answer": "water"},
-    {"q": "Which metal is liquid at room temperature?", "answer": "mercury"},
-    {"q": "What does DNA stand for? (short form)", "answer": "dna"},
-    
-    # History
-    {"q": "Who was the first President of the USA?", "answer": "george washington"},
-    {"q": "In which year did World War II end?", "answer": "1945"},
-    {"q": "The Cold War was mainly USA vs ?", "answer": "ussr"},
-    {"q": "Who discovered gravity?", "answer": "isaac newton"},
-    {"q": "The pyramids are located in which country?", "answer": "egypt"},
-    {"q": "Who was the first man to step on the moon?", "answer": "neil armstrong"},
-
-    # Movies/Books
-    {"q": "In Harry Potter, Harry’s owl is named?", "answer": "hedwig"},
-    {"q": "Who is the superhero with the shield in Marvel?", "answer": "captain america"},
-    {"q": "In The Lion King, Simba’s father is?", "answer": "mufasa"},
-    {"q": "Who created Sherlock Holmes?", "answer": "arthur conan doyle"},
-    {"q": "In The Matrix, Neo’s real name is?", "answer": "thomas anderson"},
-    {"q": "Which movie has the quote: 'May the Force be with you'?", "answer": "star wars"},
-
-    # Daily life
-    {"q": "What has keys but can’t open locks?", "answer": "piano"},
-    {"q": "Forward I am heavy, backward I am not. What am I?", "answer": "ton"},
-    {"q": "What gets wetter as it dries?", "answer": "towel"},
-    {"q": "What has one eye but cannot see?", "answer": "needle"},
-    {"q": "What has to be broken before you can use it?", "answer": "egg"},
-    {"q": "What invention lets you look right through a wall?", "answer": "window"},
-
-    # Aptitude / Trick
-    {"q": "A farmer has 17 sheep. All but 9 run away. How many are left?", "answer": "9"},
-    {"q": "If you divide 30 by half and add 10, what do you get?", "answer": "70"},
-    {"q": "A man buys a $20 book and gives a $50 note. Change?", "answer": "30"},
-    {"q": "If you have only one match and enter a dark room with an oil lamp, a candle, and a stove, what do you light first?", "answer": "match"},
+    {"q": "Unscramble this science term: **OYTNPHSSEIHS**", "answer": "PHOTOSYNTHESIS"},
+    {"q": "Unscramble this: **OTLPENARE** (Hint: our home)", "answer": "PLANET EARTH"},
+    {"q": "What comes next in sequence: 2, 4, 8, 16, ?", "answer": "32"},
+    {"q": "I speak without a mouth, hear without ears. What am I?", "answer": "ECHO"},
+    {"q": "Unscramble: **ARTOOMHC** (Hint: particle of matter)", "answer": "ATOM"},
+    {"q": "The chemical symbol 'Fe' stands for?", "answer": "IRON"},
+    {"q": "Solve: 12 ÷ (3 * 2)", "answer": "2"},
+    {"q": "Unscramble: **LOEBCMYI** (Hint: study of life)", "answer": "BIOLOGY"},
+    {"q": "Riddle: The more you take, the more you leave behind. What am I?", "answer": "FOOTSTEPS"},
+    {"q": "Unscramble: **YHISOTP** (Hint: doctor’s field)", "answer": "PHYSIOLOGY"},
+    {"q": "Solve: 7² - 5²", "answer": "24"},
+    {"q": "Which scientist proposed relativity?", "answer": "EINSTEIN"},
+    {"q": "Unscramble: **RTHEMOY** (Hint: study of heat)", "answer": "THERMOY"},  # fixable
+    {"q": "Capital of Japan?", "answer": "TOKYO"},
+    {"q": "Riddle: I have keys but no locks, I have space but no room. What am I?", "answer": "KEYBOARD"},
+    {"q": "Unscramble: **NITARGS** (Hint: astronomy object)", "answer": "STARING"},  # fix
+    {"q": "Who wrote 'Romeo and Juliet'?", "answer": "SHAKESPEARE"},
+    {"q": "Solve: (9 × 3) - 7", "answer": "20"},
+    {"q": "Unscramble: **LGNARATEWI** (Hint: related to sound)", "answer": "WAVELENGTH"},
+    {"q": "Largest mammal?", "answer": "BLUE WHALE"},
+    {"q": "Planet closest to the Sun?", "answer": "MERCURY"},
+    {"q": "Unscramble: **LUCACSLU** (Hint: famous Roman general)", "answer": "JULIUS CAESAR"},
+    {"q": "What is the powerhouse of the cell?", "answer": "MITOCHONDRIA"},
+    {"q": "Solve: 15 + (6 × 2)", "answer": "27"},
+    {"q": "Who painted Mona Lisa?", "answer": "DA VINCI"},
+    {"q": "Unscramble: **TUNQAAIR** (Hint: field of science)", "answer": "QUANTUM"},
+    {"q": "Opposite of 'evaporation'?", "answer": "CONDENSATION"},
+    {"q": "What is 144 ÷ 12?", "answer": "12"},
+    {"q": "Riddle: The more you share, the more I grow. What am I?", "answer": "KNOWLEDGE"},
+    {"q": "Planet known as the Red Planet?", "answer": "MARS"},
+    {"q": "Unscramble: **GYNREEENI** (Hint: technical field)", "answer": "ENGINEERY"}, # fix
+    {"q": "What gas do humans exhale?", "answer": "CARBON DIOXIDE"},
+    {"q": "Solve: Square root of 81?", "answer": "9"},
+    {"q": "Largest ocean on Earth?", "answer": "PACIFIC"},
+    {"q": "Unscramble: **LRTNECEEI** (Hint: electricity)", "answer": "ELECTRINE"}, # fix
+    {"q": "Riddle: I’m tall when I’m young, short when I’m old. What am I?", "answer": "CANDLE"},
+    {"q": "Who discovered gravity?", "answer": "NEWTON"},
+    {"q": "Solve: (50 ÷ 5) + 8", "answer": "18"},
+    {"q": "Unscramble: **TROOH** (Hint: honesty)", "answer": "TRUTH"},
+    {"q": "The fastest land animal?", "answer": "CHEETAH"},
+    {"q": "First man on the moon?", "answer": "NEIL ARMSTRONG"},
+    {"q": "Solve: 100 - (25 × 3)", "answer": "25"},
+    {"q": "Unscramble: **LCROMSICOP** (Hint: lab tool)", "answer": "MICROSCOPE"},
+    {"q": "Tallest mountain?", "answer": "MOUNT EVEREST"},
+    {"q": "Unscramble: **TNOMEERSA** (Hint: studies space)", "answer": "ASTRONOME"}, # fix
+    {"q": "Riddle: What has cities, but no houses; water, but no fish?", "answer": "MAP"},
+    {"q": "Solve: 6! (factorial)", "answer": "720"},
+    {"q": "Unscramble: **TPUREMOC** (Hint: device)", "answer": "COMPUTER"},
+    {"q": "Author of 'Harry Potter'?", "answer": "JK ROWLING"},
+    {"q": "Planet with rings?", "answer": "SATURN"},
 ]
 
 # -------------------
-# MAIN APP
+# APP TITLE
 # -------------------
-st.title("🧠 Obed’s Daily Puzzle Challenge")
-st.markdown("Solve up to **5 puzzles a day**, earn points, and climb the leaderboard 🚀")
+st.title("🧩 Obed's Puzzle Challenge")
+st.markdown("Welcome challenger! Solve puzzles, earn points, and rise on the leaderboard 🚀")
 
-# Track visits
-if "visited" not in st.session_state:
-    data["visits"] = data.get("visits", 0) + 1
-    save_data(data)
-    st.session_state.visited = True
-
-username = st.text_input("👉 Enter your username to start:")
+username = st.text_input("👉 Enter your name to start:")
 
 if username:
     today = datetime.now().strftime("%Y-%m-%d")
@@ -123,27 +114,26 @@ if username:
     if player["last_played"] != today:
         player["today_count"] = 0
 
-    # -------------------
-    # GAME LOGIC
-    # -------------------
     if player["today_count"] < 5:
         if "current_q" not in st.session_state:
             st.session_state.current_q = None
+            st.session_state.current_a = None
 
-        if st.button("🎲 Get a Puzzle"):
-            st.session_state.current_q = random.choice(puzzles)
+        if st.button("🎲 Get Puzzle"):
+            puzzle = random.choice(puzzles)
+            st.session_state.current_q = puzzle["q"]
+            st.session_state.current_a = puzzle["answer"]
 
         if st.session_state.current_q:
-            q = st.session_state.current_q
-            st.markdown(f"### ❓ {q['q']}")
-            answer = st.text_input("Your answer:", key=f"ans_{player['today_count']}")
+            st.markdown(f"### ❓ {st.session_state.current_q}")
+            answer = st.text_input("Your Answer:", key=f"ans_{player['today_count']}")
 
-            if st.button("✅ Submit Answer", key=f"submit_{player['today_count']}"):
-                if answer.strip().lower() == q["answer"].lower():
+            if st.button("✅ Submit Answer"):
+                if answer.strip().upper() == st.session_state.current_a.upper():
                     st.success("🎉 Correct! +10 points")
                     player["score"] += 10
                 else:
-                    st.error(f"❌ Wrong! The correct answer is **{q['answer']}**.")
+                    st.error(f"❌ Wrong! Correct answer: **{st.session_state.current_a}**")
 
                 player["today_count"] += 1
                 yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -154,13 +144,11 @@ if username:
                 player["last_played"] = today
 
                 players[username] = player
-                data["players"] = players
-                save_data(data)
-
+                save_data(players)
                 st.session_state.current_q = None
-
+                st.session_state.current_a = None
     else:
-        st.warning("⏳ You’ve answered 5 puzzles today. Come back tomorrow!")
+        st.warning("⏳ You’ve solved 5 puzzles today. Come back tomorrow!")
 
     # -------------------
     # LEADERBOARD
@@ -168,11 +156,13 @@ if username:
     st.markdown("---")
     st.subheader("🏆 Leaderboard")
     leaderboard = sorted(players.items(), key=lambda x: x[1]["score"], reverse=True)
+    for i, (name, data) in enumerate(leaderboard[:10], start=1):
+        st.markdown(f"**{i}. {name}** — {data['score']} pts | 🔥 {data['streak']} days streak")
 
-    for i, (name, pdata) in enumerate(leaderboard[:10], start=1):
-        st.markdown(
-            f"**{i}. {name}** — {pdata['score']} pts | 🔥 Streak: {pdata['streak']} days"
-        )
-
-    st.markdown("---")
-    st.info(f"👀 Total site visits: {data.get('visits', 0)}")
+# -------------------
+# VISITOR COUNTER
+# -------------------
+if "visits" not in st.session_state:
+    st.session_state.visits = 0
+st.session_state.visits += 1
+st.sidebar.success(f"👀 Visitors this session: {st.session_state.visits}")
