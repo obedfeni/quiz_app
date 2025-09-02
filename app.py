@@ -19,7 +19,6 @@ hide_streamlit_style = """
     header {visibility: hidden;}
     </style>
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # Custom Theme: Blue & White
 custom_style = """
     <style>
@@ -235,4 +234,5 @@ if username:
 
     st.markdown("---")
     st.info(f"👀 Total site visits: {data.get('visits', 0)}") 
+
 
