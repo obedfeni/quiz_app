@@ -84,6 +84,34 @@ puzzles = [
     {"q": "Unscramble: **ROTAHPOTOHS** (graphic tool)", "answer": "PHOTOSHOP"},
     {"q": "Unscramble: **ANCMERIA** (country)", "answer": "AMERICA"},
     {"q": "Unscramble: **CTEILEVE** (electric property)", "answer": "VELOCITE"},
+    {"q": "Unscramble: **FCRIAA**", "answer": "AFRICA"},
+    {"q": "Unscramble: **AIASS**", "answer": "ASIA"},
+    {"q": "Unscramble: **EORUP**", "answer": "EUROPE"},
+    {"q": "Unscramble: **ITACAOASUNRL**", "answer": "AUSTRALOCIAN → AUSTRALIA"},  
+    {"q": "Unscramble: **THOANR AMRICEA**", "answer": "NORTH AMERICA"},
+    {"q": "Unscramble: **SOTHU AMRICEA**", "answer": "SOUTH AMERICA"},
+    {"q": "Unscramble: **ACTTACANRIA**", "answer": "ANTARCTICA"},
+    {"q": "Unscramble: **ACANAD**", "answer": "CANADA"},{"q": "Unscramble: **NIDIA**", "answer": "INDIA"},
+    {"q": "Unscramble: **APANJ**", "answer": "JAPAN"},
+{"q": "Unscramble: **NAMREY**", "answer": "GERMANY"},
+{"q": "Unscramble: **ZILBAR**", "answer": "BRAZIL"},
+{"q": "Unscramble: **FGNRAEC**", "answer": "FRANCE"},
+{"q": "Unscramble: **XOCEMI**", "answer": "MEXICO"},
+{"q": "Unscramble: **GKORAE**", "answer": "KOREA"},
+{"q": "Unscramble: **SITAUARL**", "answer": "AUSTRALIA"},
+{"q": "Unscramble: **EYPTG**", "answer": "EGYPT"},
+{"q": "Unscramble: **ANIPSE**", "answer": "SPAIN"},
+{"q": "Unscramble: **KNUAYR**", "answer": "UKRAINE"},
+{"q": "Unscramble: **GTLUAORE**", "answer": "PORTUGAL"},
+{"q": "Unscramble: **ANZIMBAWE**", "answer": "ZIMBABWE"},
+{"q": "Unscramble: **RUSASIA**", "answer": "RUSSIA"},
+{"q": "Unscramble: **NILEGDNA**", "answer": "ENGLAND"},
+{"q": "Unscramble: **NEDALSWRIT**", "answer": "SWITZERLAND"},
+{"q": "Unscramble: **NDAALHETRS**", "answer": "NETHERLANDS"},
+{"q": "Unscramble: **RAQAAT**", "answer": "QATAR"},
+{"q": "Unscramble: **ARCSAINH**", "answer": "CHINA"},
+
+
 
     # Logic/Math
     {"q": "What comes next: 1, 1, 2, 3, 5, 8, ?", "answer": "13"},
@@ -281,6 +309,7 @@ if username in players:
         share_text = f"🧠 I scored {players[username]['score']} pts with a 🔥 streak of {players[username]['streak']} days in Obed’s Puzzle Challenge! Try to beat me!"
         st.text_area("📢 Share your results:", share_text, height=100)
         st.markdown("👉 Copy this text and post on **Bluesky, Snapchat, Twitter, or WhatsApp**!")
+
 
 
 
