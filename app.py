@@ -1,131 +1,113 @@
 import streamlit as st
 import random
-import requests
+import json
+import os
+from datetime import datetime, timedelta
 
 # -------------------
-# Config
+# CONFIG
 # -------------------
-st.set_page_config(
-    page_title="Mufasa's Quiz 🎯",
-    page_icon="🔥",
-    layout="centered"
-)
+st.set_page_config(page_title="Answer mufasa's Questions 🎮", page_icon="🎯", layout="centered")
 
-st.markdown(
-    "<h1 style='text-align:center; color:#4CAF50;'>🔥 mufasa's Quiz Challenge 🔥</h1>",
-    unsafe_allow_html=True
-)
-st.write("Choose a category, answer 3 questions, and share your score under mufasa Bluesky post 🎉")
+DATA_FILE = "player_data.json"
 
 # -------------------
-# Player Counter
+# LOAD / SAVE DATA
 # -------------------
-def update_player_count():
-    """Update and fetch the number of players using CountAPI."""
-    namespace = "obed_quiz_app"
-    key = "players"
-    url = f"https://api.countapi.xyz/hit/{namespace}/{key}"
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()["value"]
-    except Exception:
-        return None
-    return None
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+players = load_data()
 
 # -------------------
-# Question Bank
+# QUESTION BANK
 # -------------------
 questions = {
-    "Mufasa Specials": [
-        {"q": "What is mufasa full name?", "a": "Obed Feni"},
-        {"q": "What is mufasa African house name?", "a": "Kobby"},
-        {"q": "How old is mufasa?", "a": "24"},
-        {"q": "What is mufasa favorite food?", "a": "Jollof Rice"},
-        {"q": "What is mufasa favorite movie?", "a": "Black Panther"},
+    "About Obed": [
+        {"q": "What is Obed Feni’s African house name?", "options": ["Kobby", "Kojo", "Nana", "Kwame"], "answer": "Kobby"},
+        {"q": "How old is Obed Feni?", "options": ["22", "24", "26", "28"], "answer": "24"},
+        {"q": "What is Obed’s favorite food?", "options": ["Jollof Rice", "Pizza", "Fufu", "Banku"], "answer": "YOUR_ANSWER"},
+        {"q": "What is Obed’s favorite movie?", "options": ["Inception", "Black Panther", "Titanic", "Avengers"], "answer": "YOUR_ANSWER"},
     ],
-    "History": [
-        {"q": "Who was the first President of the USA?", "a": "George Washington"},
-        {"q": "In which year did World War II end?", "a": "1945"},
-        {"q": "Which empire built the pyramids?", "a": "Egyptians"},
+    "Science & STEM": [
+        {"q": "What is H2O commonly known as?", "options": ["Water", "Oxygen", "Hydrogen", "Salt"], "answer": "Water"},
+        {"q": "Which planet is known as the Red Planet?", "options": ["Earth", "Mars", "Venus", "Jupiter"], "answer": "Mars"},
+        {"q": "Who invented the light bulb?", "options": ["Edison", "Newton", "Tesla", "Einstein"], "answer": "Edison"},
+        {"q": "The speed of light is approximately…", "options": ["3,000 km/s", "30,000 km/s", "300,000 km/s", "3,000,000 km/s"], "answer": "300,000 km/s"},
     ],
-    "Science": [
-        {"q": "What planet is closest to the sun?", "a": "Mercury"},
-        {"q": "What gas do humans need to breathe?", "a": "Oxygen"},
-        {"q": "What is H2O commonly known as?", "a": "Water"},
+    "History & Arts": [
+        {"q": "Who painted the Mona Lisa?", "options": ["Picasso", "Da Vinci", "Van Gogh", "Rembrandt"], "answer": "Da Vinci"},
+        {"q": "The Great Pyramid of Giza is in which country?", "options": ["Egypt", "Sudan", "Mexico", "India"], "answer": "Egypt"},
+        {"q": "Which empire built the Colosseum?", "options": ["Greek", "Roman", "Ottoman", "Byzantine"], "answer": "Roman"},
     ],
-    "Biology": [
-        {"q": "What organ pumps blood through the body?", "a": "Heart"},
-        {"q": "What part of the plant makes food?", "a": "Leaf"},
-        {"q": "Which animal is known as the King of the Jungle?", "a": "Lion"},
+    "Psychometric & Fun": [
+        {"q": "Do you prefer mornings or nights?", "options": ["Mornings", "Nights"], "answer": None},
+        {"q": "If you were an animal, which one are you most like?", "options": ["Lion", "Turtle", "Bird", "Monkey"], "answer": None},
+        {"q": "You’re given $1,000 — do you spend or save?", "options": ["Spend", "Save"], "answer": None},
     ],
-    "Arts": [
-        {"q": "Who painted the Mona Lisa?", "a": "Leonardo da Vinci"},
-        {"q": "Shakespeare wrote 'Romeo and ___'?", "a": "Juliet"},
-        {"q": "What do you call a person who plays the piano?", "a": "Pianist"},
-    ],
-    "Inventions": [
-        {"q": "Who invented the light bulb?", "a": "Thomas Edison"},
-        {"q": "Who is credited with inventing the telephone?", "a": "Alexander Graham Bell"},
-        {"q": "What company created the first iPhone?", "a": "Apple"},
-    ],
-    "Photography": [
-        {"q": "What does DSLR stand for? (short form accepted)", "a": "Digital Single Lens Reflex"},
-        {"q": "Which company makes the 'EOS' camera series?", "a": "Canon"},
-        {"q": "What does the 'ISO' setting control in photography?", "a": "Light sensitivity"},
-    ],
-    "Psychometrics": [
-        {"q": "If you enjoy solving puzzles, which trait is that linked to?", "a": "Problem-solving"},
-        {"q": "Introverts gain energy from?", "a": "Being alone"},
-        {"q": "Extroverts gain energy from?", "a": "Being with others"},
-    ]
 }
 
 # -------------------
-# Category Selection
+# USER LOGIN
 # -------------------
-category = st.selectbox("🎯 Choose a category:", list(questions.keys()))
+st.title("🎯 Answer mufasa's Questions!")
+username = st.text_input("Enter your name to start:")
 
-# Initialize session state
-if "quiz_started" not in st.session_state:
-    st.session_state.quiz_started = False
-    st.session_state.current_q = 0
-    st.session_state.score = 0
-    st.session_state.selected_questions = []
+if username:
+    today = datetime.now().strftime("%Y-%m-%d")
+    player = players.get(username, {"score": 0, "last_played": None, "streak": 0, "today_count": 0})
 
-if st.button("Start Quiz"):
-    st.session_state.quiz_started = True
-    st.session_state.current_q = 0
-    st.session_state.score = 0
-    st.session_state.selected_questions = random.sample(questions[category], 3)
+    # Reset daily counter
+    if player["last_played"] != today:
+        player["today_count"] = 0
 
-# -------------------
-# Quiz Logic
-# -------------------
-if st.session_state.quiz_started:
-    if st.session_state.current_q < 3:
-        q_data = st.session_state.selected_questions[st.session_state.current_q]
-        st.subheader(f"Q{st.session_state.current_q+1}: {q_data['q']}")
+    # -------------------
+    # GAME LOGIC
+    # -------------------
+    if player["today_count"] < 3:
+        st.subheader("Choose a category:")
+        category = st.selectbox("Categories", list(questions.keys()))
 
-        user_answer = st.text_input("✍️ Your Answer:", key=f"q{st.session_state.current_q}")
-        if st.button("Submit", key=f"submit{st.session_state.current_q}"):
-            if user_answer.strip().lower() == q_data["a"].lower():
-                st.success("✅ Correct!")
-                st.session_state.score += 1
-            else:
-                st.error(f"❌ Wrong! The correct answer is {q_data['a']}")
+        if st.button("Get a Question 🎲"):
+            q = random.choice(questions[category])
+            st.write(f"**{q['q']}**")
+            choice = st.radio("Pick one:", q["options"], key=random.randint(0, 100000))
 
-            st.session_state.current_q += 1
+            if st.button("Submit Answer ✅"):
+                if q["answer"] and choice == q["answer"]:
+                    st.success("Correct! 🎉")
+                    player["score"] += 1
+                elif q["answer"]:
+                    st.error(f"Wrong! The correct answer is {q['answer']}.")
+                else:
+                    st.info(f"Nice choice: {choice}")
 
-    # End of Quiz
-    if st.session_state.current_q >= 3:
-        st.subheader("🎉 Quiz Complete!")
-        st.write(f"Your Score: **{st.session_state.score}/3**")
-        st.balloons()
-        player_number = update_player_count()
-        if player_number:
-            st.markdown(f"👥 You are **Player #{player_number}** to finish the quiz!")
-        st.markdown("📸 Screenshot your result and post under mufasa’s Bluesky post!")
-        st.session_state.quiz_started = False
+                player["today_count"] += 1
+                player["last_played"] = today
 
+                # Update streak
+                if player.get("last_played") == (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"):
+                    player["streak"] += 1
+                elif player["today_count"] == 1:
+                    player["streak"] = 1
 
+                players[username] = player
+                save_data(players)
+
+    else:
+        st.warning("You’ve answered 3 questions today. Come back tomorrow! ⏰")
+
+    # -------------------
+    # LEADERBOARD
+    # -------------------
+    st.subheader("🏆 Leaderboard")
+    leaderboard = sorted(players.items(), key=lambda x: x[1]["score"], reverse=True)
+    for i, (name, data) in enumerate(leaderboard[:10], start=1):
+        st.write(f"{i}. {name} — {data['score']} points (🔥 Streak: {data['streak']} days)")
