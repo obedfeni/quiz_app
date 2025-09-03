@@ -62,14 +62,24 @@ POINTS_PER_CORRECT = 10
 # LOAD / SAVE DATA (Firestore)
 # -------------------
 def load_data():
-    doc = db.collection("puzzle_data").document("state").get()
+    doc_ref = db.collection("game_data").document("main")
+    doc = doc_ref.get()
     if doc.exists:
         return doc.to_dict()
     else:
-        return {"players": {}, "visits": 0}
+        # Initialize if not exists
+        initial = {"players": {}, "visits": 0}
+        doc_ref.set(initial)
+        return initial
 
 def save_data(data):
-    db.collection("puzzle_data").document("state").set(data)
+    doc_ref = db.collection("game_data").document("main")
+    doc_ref.set(data)
+
+# Load once at start
+data = load_data()
+players = data.get("players", {})
+visits = data.get("visits", 0)
 
 # -------------------
 # PUZZLE BANK (50+)
@@ -308,6 +318,7 @@ if username in players:
         share_text = f"🧠 I scored {players[username]['score']} pts with a 🔥 streak of {players[username]['streak']} days in Obed’s Puzzle Challenge! Try to beat me!"
         st.text_area("📢 Share your results:", share_text, height=100)
         st.markdown("👉 Copy this text and post on **Bluesky, Snapchat, Twitter, or WhatsApp**!")
+
 
 
 
