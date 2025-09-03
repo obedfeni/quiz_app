@@ -3,6 +3,15 @@ import random
 import json
 import os
 from datetime import datetime, timedelta
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Initialize Firebase using secrets
+if not firebase_admin._apps:
+    cred = credentials.Certificate(dict(st.secrets["firebase"]))
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 # -------------------
 # CONFIG
@@ -50,27 +59,17 @@ PLAYS_PER_DAY = 5
 POINTS_PER_CORRECT = 10
 
 # -------------------
-# LOAD / SAVE DATA
+# LOAD / SAVE DATA (Firestore)
 # -------------------
 def load_data():
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {"players": {}, "visits": 0}
+    doc = db.collection("puzzle_data").document("state").get()
+    if doc.exists:
+        return doc.to_dict()
+    else:
+        return {"players": {}, "visits": 0}
 
 def save_data(data):
-    try:
-        with open(DATA_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception:
-        pass
-
-data = load_data()
-players = data.get("players", {})
-visits = data.get("visits", 0)
+    db.collection("puzzle_data").document("state").set(data)
 
 # -------------------
 # PUZZLE BANK (50+)
@@ -309,6 +308,7 @@ if username in players:
         share_text = f"🧠 I scored {players[username]['score']} pts with a 🔥 streak of {players[username]['streak']} days in Obed’s Puzzle Challenge! Try to beat me!"
         st.text_area("📢 Share your results:", share_text, height=100)
         st.markdown("👉 Copy this text and post on **Bluesky, Snapchat, Twitter, or WhatsApp**!")
+
 
 
 
