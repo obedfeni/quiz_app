@@ -94,31 +94,31 @@ puzzles = [
     {"q": "Unscramble: **ANCMERIA** (country)", "answer": "AMERICA"},
     {"q": "Unscramble: **CTEILEVE** (electric property)", "answer": "VELOCITE"},
     {"q": "Unscramble: **FCRIAA**", "answer": "AFRICA"},
-    {"q": "Unscramble: **AIASS**", "answer": "ASIA"},
-    {"q": "Unscramble: **EORUP**", "answer": "EUROPE"},
+    {"q": "Unscramble: **AIAS**", "answer": "ASIA"},
+    {"q": "Unscramble: **EORUPE**", "answer": "EUROPE"},
     {"q": "Unscramble: **ITACAOASUNRL**", "answer": "AUSTRALOCIAN → AUSTRALIA"},  
     {"q": "Unscramble: **THOANR AMRICEA**", "answer": "NORTH AMERICA"},
     {"q": "Unscramble: **SOTHU AMRICEA**", "answer": "SOUTH AMERICA"},
     {"q": "Unscramble: **ACTTACANRIA**", "answer": "ANTARCTICA"},
     {"q": "Unscramble: **ACANAD**", "answer": "CANADA"},{"q": "Unscramble: **NIDIA**", "answer": "INDIA"},
     {"q": "Unscramble: **APANJ**", "answer": "JAPAN"},
-{"q": "Unscramble: **NAMREY**", "answer": "GERMANY"},
+{"q": "Unscramble: **NGAMREY**", "answer": "GERMANY"},
 {"q": "Unscramble: **ZILBAR**", "answer": "BRAZIL"},
-{"q": "Unscramble: **FGNRAEC**", "answer": "FRANCE"},
+{"q": "Unscramble: **FNRAEC**", "answer": "FRANCE"},
 {"q": "Unscramble: **XOCEMI**", "answer": "MEXICO"},
-{"q": "Unscramble: **GKORAE**", "answer": "KOREA"},
-{"q": "Unscramble: **SITAUARL**", "answer": "AUSTRALIA"},
+{"q": "Unscramble: **KORAE**", "answer": "KOREA"},
+{"q": "Unscramble: **SITRAUARL**", "answer": "AUSTRALIA"},
 {"q": "Unscramble: **EYPTG**", "answer": "EGYPT"},
 {"q": "Unscramble: **ANIPSE**", "answer": "SPAIN"},
 {"q": "Unscramble: **KNUAYR**", "answer": "UKRAINE"},
-{"q": "Unscramble: **GTLUAORE**", "answer": "PORTUGAL"},
+{"q": "Unscramble: **GTLUAORP**", "answer": "PORTUGAL"},
 {"q": "Unscramble: **ANZIMBAWE**", "answer": "ZIMBABWE"},
 {"q": "Unscramble: **RUSASIA**", "answer": "RUSSIA"},
 {"q": "Unscramble: **NILEGDNA**", "answer": "ENGLAND"},
 {"q": "Unscramble: **NEDALSWRIT**", "answer": "SWITZERLAND"},
 {"q": "Unscramble: **NDAALHETRS**", "answer": "NETHERLANDS"},
-{"q": "Unscramble: **RAQAAT**", "answer": "QATAR"},
-{"q": "Unscramble: **ARCSAINH**", "answer": "CHINA"},
+{"q": "Unscramble: **RAQAT**", "answer": "QATAR"},
+{"q": "Unscramble: **CAINH**", "answer": "CHINA"},
 
 
 
@@ -319,6 +319,7 @@ if username in players:
         st.text_area("📢 Share your results:", share_text, height=100) 
         st.markdown("👉 Copy this text and post on **Bluesky, Snapchat, Twitter, or WhatsApp**!")
 st.success("🎉 Game Over! Here’s your share message:")
+
 
 
 
