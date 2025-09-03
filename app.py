@@ -318,15 +318,8 @@ if username in players:
         share_text = f"🧠 I scored {players[username]['score']} pts with a 🔥 streak of {players[username]['streak']} days in Puzzle Challenge! Try to beat me!\n👉 https://answermufasaquestions.streamlit.app/"
         st.text_area("📢 Share your results:", share_text, height=100) 
         st.markdown("👉 Copy this text and post on **Bluesky, Snapchat, Twitter, or WhatsApp**!")
-
-
 st.success("🎉 Game Over! Here’s your share message:")
 
-# Display the message
-st.code(share_text, language="")
-
-# Optional: one-click copy button
-st.button("📋 Copy Message", on_click=lambda: st.session_state.update({"copy_text": share_text}))
 
 
 
