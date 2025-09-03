@@ -315,20 +315,10 @@ st.info(f"👀 Total site visits: {data.get('visits', 0)}")
     # SHAREABLE RESULTS
     # -------------------
 if username in players:
-        # Example values
-username = "Obed"
-score = 40
-streak = 1
+        share_text = f"🧠 I scored {players[username]['score']} pts with a 🔥 streak of {players[username]['streak']} days in Obed’s Puzzle Challenge! Try to beat me!"
+        st.text_area("📢 Share your results:", share_text, height=100) 
+        st.markdown("👉 Copy this text and post on **Bluesky, Snapchat, Twitter, or WhatsApp**!")
 
-share_message = f"🧠 I scored {score} pts with a 🔥 streak of {streak} days in {username}’s Puzzle Challenge! Try to beat me!\n👉 https://answermufasaquestions.streamlit.app/"
-
-st.success("🎉 Game Over! Here’s your share message:")
-
-# Display the message
-st.code(share_message, language="")
-
-# Optional: one-click copy button
-st.button("📋 Copy Message", on_click=lambda: st.session_state.update({"copy_text": share_message}))
 
 
 
