@@ -17,7 +17,7 @@ db = firestore.client()
 # CONFIG
 # -------------------
 st.set_page_config(
-    page_title="Obed’s Puzzle Challenge 🧩",
+    page_title="Puzzle Challenge 🧩",
     page_icon="🧠",
     layout="centered"
 )
@@ -332,6 +332,7 @@ st.code(share_message, language="")
 
 # Optional: one-click copy button
 st.button("📋 Copy Message", on_click=lambda: st.session_state.update({"copy_text": share_message}))
+
 
 
 
