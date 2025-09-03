@@ -184,7 +184,7 @@ puzzles = [
 st.markdown(
     """
     <div class="block-card" style="text-align:center;">
-      <h1>🧠 Obed’s Daily Puzzle Challenge</h1>
+      <h1>🧠Daily Puzzle Challenge</h1>
       <p class="small">Solve up to <b>5 puzzles per day</b>. Each correct answer is <b>+10 points</b>. Keep your streak and climb the leaderboard 🚀</p>
     </div>
     """,
@@ -319,6 +319,7 @@ if username in players:
         st.text_area("📢 Share your results:", share_text, height=100) 
         st.markdown("👉 Copy this text and post on **Bluesky, Snapchat, Twitter, or WhatsApp**!")
 st.success("🎉 Game Over! Here’s your share message:")
+
 
 
 
